@@ -1,6 +1,11 @@
-.header {
+.headerWrapper {
   background-color: #daddaa;
-  padding: 8rem 16rem;
+}
+
+.header {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 4rem 0;
 }
 
 .headerLogo {
@@ -25,4 +30,9 @@
 
 .subheader div {
   margin: 1rem;
+}
+
+.form {
+  max-width: 25rem;
+  margin: 2rem auto;
 }
