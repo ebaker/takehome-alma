@@ -2,6 +2,8 @@
 import { useState } from "react";
 
 type LeadStatusFilter = "ALL" | "PENDING" | "REACHED_OUT";
+type SortField = "fullName" | "submittedAt" | "status" | "country";
+type SortDirection = -1 | 1;
 import styles from "./LeadsTable.module.css";
 
 const leadsData = [
@@ -67,15 +69,45 @@ export default function SubmissionsTable() {
   const [data, setData] = useState(leadsData);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatusFilter>("ALL");
+  const [sortField, setSortField] = useState<SortField>("submittedAt");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(-1);
 
-  const filteredData = data.filter((submission) => {
-    const matchesSearch = submission.fullName
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "ALL" || submission.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((sortDirection * -1) as SortDirection);
+    } else {
+      setSortField(field);
+      setSortDirection(1);
+    }
+  };
+
+  const getSortedData = (data) => {
+    return [...data].sort((a, b) => {
+      switch (sortField) {
+        case "fullName":
+          return sortDirection * a.fullName.localeCompare(b.fullName);
+        case "submittedAt":
+          return sortDirection * (a.submittedAt - b.submittedAt);
+        case "status":
+          return sortDirection * a.status.localeCompare(b.status);
+        case "country":
+          return sortDirection * a.country.localeCompare(b.country);
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const filteredData = getSortedData(
+    data.filter((submission) => {
+      const matchesSearch = submission.fullName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === "ALL" || submission.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+  );
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
@@ -113,10 +145,46 @@ export default function SubmissionsTable() {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Full Name</th>
-            <th>Submitted At</th>
-            <th>Status</th>
-            <th>Country</th>
+            <th onClick={() => handleSort("fullName")}>
+              Full Name
+              <span
+                className={`${styles.sortIcon} ${
+                  sortField === "fullName" && sortDirection === 1
+                    ? styles.asc
+                    : ""
+                }`}
+              />
+            </th>
+            <th onClick={() => handleSort("submittedAt")}>
+              Submitted
+              <span
+                className={`${styles.sortIcon} ${
+                  sortField === "submittedAt" && sortDirection === 1
+                    ? styles.asc
+                    : ""
+                }`}
+              />
+            </th>
+            <th onClick={() => handleSort("status")}>
+              Status
+              <span
+                className={`${styles.sortIcon} ${
+                  sortField === "status" && sortDirection === 1
+                    ? styles.asc
+                    : ""
+                }`}
+              />
+            </th>
+            <th onClick={() => handleSort("country")}>
+              Country
+              <span
+                className={`${styles.sortIcon} ${
+                  sortField === "country" && sortDirection === 1
+                    ? styles.asc
+                    : ""
+                }`}
+              />
+            </th>
             <th></th>
           </tr>
         </thead>
