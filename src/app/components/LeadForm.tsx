@@ -7,7 +7,7 @@ import {
   materialCells,
 } from "@jsonforms/material-renderers";
 import { useState, useEffect } from "react";
-import { Button, Alert } from "@mui/material";
+import { Button, Alert, TextField } from "@mui/material";
 
 export default function LeadForm() {
   const [mounted, setMounted] = useState(false);
@@ -23,7 +23,7 @@ export default function LeadForm() {
   const [interestErrors, setInterestErrors] = useState([]);
 
   const [helpData, setHelpData] = useState({});
-  const [helpErrors, setHelpErrors] = useState([]);
+  const [helpErrors, setHelpErrors] = useState(['Description is required']);
 
   useEffect(() => {
     setMounted(true);
@@ -119,31 +119,6 @@ export default function LeadForm() {
     ],
   };
 
-  const helpSchema = {
-    type: "object",
-    properties: {
-      description: {
-        type: "string",
-      },
-    },
-    required: ["description"],
-  };
-
-  const helpUiSchema = {
-    type: "VerticalLayout",
-    elements: [
-      {
-        type: "Control",
-        scope: "#/properties/description",
-        label:
-          "What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?",
-        options: {
-          multiline: true,
-          rows: 5,
-        },
-      },
-    ],
-  };
 
   const handleSubmit = async () => {
     setShowValidation(true);
@@ -243,23 +218,25 @@ export default function LeadForm() {
           </Section>
 
           <Section title="How can we help you?" imageUrl="/heart.png">
-            <JsonForms
-              schema={helpSchema}
-              uischema={helpUiSchema}
-              data={helpData}
-              renderers={materialRenderers}
-              cells={materialCells}
-              onChange={({ data, errors }) => {
-                setHelpData(data);
-                setHelpErrors(errors);
+            <TextField
+              fullWidth
+              multiline
+              rows={5}
+              label=""
+              required
+              placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?"
+              value={helpData.description || ''}
+              onChange={(e) => {
+                const newValue = e.target.value.trim();
+                setHelpData({ description: newValue });
+                setHelpErrors(newValue.length === 0 ? ['Description is required'] : []);
               }}
-              validationMode={
-                showValidation ? "ValidateAndShow" : "ValidateAndHide"
-              }
+              error={showValidation && helpErrors.length > 0}
+              helperText={showValidation && helpErrors.length > 0 ? 'This field is required' : ''}
             />
           </Section>
 
-          <div style={{ maxWidth: "25rem", margin: "0 auto" }}>
+          <div style={{ maxWidth: "25rem", margin: "3rem auto" }}>
             {apiError && (
               <Alert severity="error" className="mb-4">
                 {apiError}
@@ -270,7 +247,7 @@ export default function LeadForm() {
               fullWidth
               onClick={handleSubmit}
               variant="contained"
-              sx={{ p: 2 }}
+              sx={{ p: 2, mb: 4 }}
               disabled={loading}
             >
               {loading ? "Submitting..." : "Submit"}
