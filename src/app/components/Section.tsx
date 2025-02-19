@@ -14,7 +14,7 @@ const Section = ({
 }) => (
   <div className={styles.subheader}>
     <img src={imageUrl} />
-    <h2>{title}</h2>
+    <h2 className={styles.title}>{title}</h2>
     {description && <div className={styles.description}>{description}</div>}
     <div style={{ maxWidth: "25rem", margin: "0 auto" }}>{children}</div>
   </div>

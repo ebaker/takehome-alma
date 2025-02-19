@@ -1,11 +1,17 @@
 .subheader {
   text-align: center;
-  max-width: 32rem;
+  max-width: 34rem;
   margin: 0 auto;
 }
 
 .subheader img {
-  margin: 2rem 1rem 1rem;
+  margin-top: 2rem;
+}
+
+
+.title {
+  font-weight: 600;
+  margin-top: 0rem;
 }
 
 .description {
