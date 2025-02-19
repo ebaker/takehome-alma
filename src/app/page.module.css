@@ -1,5 +1,9 @@
 .headerWrapper {
   background-color: #daddaa;
+  background-image: url('/leadform.png');
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
 }
 
 .header {
@@ -15,5 +19,6 @@
 .headerText {
   font-size: 4rem;
   font-weight: bold;
-  padding: 4rem 0;
+  padding: 2rem 0;
+  line-height: 4.5rem;
 }
