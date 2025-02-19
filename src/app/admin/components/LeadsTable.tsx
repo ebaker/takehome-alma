@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+
+type LeadStatusFilter = "ALL" | "PENDING" | "REACHED_OUT";
 import styles from "./LeadsTable.module.css";
 
 const leadsData = [
@@ -64,13 +66,21 @@ const leadsData = [
 export default function SubmissionsTable() {
   const [data, setData] = useState(leadsData);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<LeadStatusFilter>("ALL");
 
-  const filteredData = data.filter((submission) =>
-    submission.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = data.filter((submission) => {
+    const matchesSearch = submission.fullName
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "ALL" || submission.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
+
   const handleMarkReachedOut = (id: number) =>
     setData((prev) =>
       prev.map((submission) =>
@@ -79,15 +89,27 @@ export default function SubmissionsTable() {
           : submission
       )
     );
+
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Search"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className={styles.searchInput}
-      />
+      <div className={styles.filterContainer}>
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as LeadStatusFilter)}
+          className={styles.statusSelect}
+        >
+          <option value="ALL">All Status</option>
+          <option value="PENDING">Pending</option>
+          <option value="REACHED_OUT">Reached Out</option>
+        </select>
+      </div>
       <table className={styles.table}>
         <thead>
           <tr>

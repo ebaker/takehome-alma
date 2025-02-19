@@ -14,11 +14,26 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.filterContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .searchInput {
   width: 40ch;
   padding: 0.75rem;
-  margin-bottom: 1rem;
   border: 1px solid #efefef;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 1rem;
+}
+
+.statusSelect {
+  min-width: 15ch;
+  padding: 0.75rem;
+  border: 1px solid #efefef;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
 }
