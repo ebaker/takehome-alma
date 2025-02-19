@@ -11,32 +11,30 @@ import { Button, Alert } from "@mui/material";
 
 export default function LeadForm() {
   const [mounted, setMounted] = useState(false);
-  const [data, setData] = useState({});
-  const [errors, setErrors] = useState([]);
   const [showValidation, setShowValidation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  const [personalData, setPersonalData] = useState({});
+  const [personalErrors, setPersonalErrors] = useState([]);
+
+  const [interestData, setInterestData] = useState({});
+  const [interestErrors, setInterestErrors] = useState([]);
+
+  const [helpData, setHelpData] = useState({});
+  const [helpErrors, setHelpErrors] = useState([]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const schema = {
+  const personalSchema = {
     type: "object",
     properties: {
-      firstname: {
-        type: "string",
-        minLength: 3,
-      },
-      lastname: {
-        type: "string",
-        minLength: 3,
-      },
-      email: {
-        type: "string",
-        format: "email",
-      },
+      firstname: { type: "string", minLength: 3 },
+      lastname: { type: "string", minLength: 3 },
+      email: { type: "string", format: "email" },
       citizenship: {
         type: "string",
         enum: [
@@ -58,15 +56,12 @@ export default function LeadForm() {
           "Other",
         ],
       },
-      website: {
-        type: "string",
-        format: "url",
-      },
+      website: { type: "string", format: "url" },
     },
     required: ["firstname", "lastname", "email", "citizenship", "website"],
   };
 
-  const uischema = {
+  const personalUiSchema = {
     type: "VerticalLayout",
     elements: [
       {
@@ -97,25 +92,92 @@ export default function LeadForm() {
     ],
   };
 
+  const interestSchema = {
+    type: "object",
+    properties: {
+      interest: {
+        type: "array",
+        uniqueItems: true,
+        items: {
+          type: "string",
+          enum: ["O-1", "EB-1A", "EB-2 NIW", "I don't know"],
+        },
+      },
+    },
+    required: ["interest"],
+  };
+
+  const interestUiSchema = {
+    type: "VerticalLayout",
+    elements: [
+      {
+        type: "Control",
+        scope: "#/properties/interest",
+        label: false,
+        classNames: ["hide-required"],
+      },
+    ],
+  };
+
+  const helpSchema = {
+    type: "object",
+    properties: {
+      description: {
+        type: "string",
+      },
+    },
+    required: ["description"],
+  };
+
+  const helpUiSchema = {
+    type: "VerticalLayout",
+    elements: [
+      {
+        type: "Control",
+        scope: "#/properties/description",
+        label:
+          "What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?",
+        options: {
+          multiline: true,
+          rows: 5,
+        },
+      },
+    ],
+  };
+
   const handleSubmit = async () => {
     setShowValidation(true);
     setApiError("");
 
-    if (errors.length > 0) {
-      console.log("Form validation failed", errors);
+    if (
+      personalErrors.length > 0 ||
+      interestErrors.length > 0 ||
+      helpErrors.length > 0
+    ) {
+      console.log("Validation failed", {
+        personalErrors,
+        interestErrors,
+        helpErrors,
+      });
       return;
     }
+
+    const combinedData = {
+      ...personalData,
+      ...interestData,
+      ...helpData,
+    };
 
     setLoading(true);
 
     try {
-      console.log("Form is valid, submitting:", data);
+      console.log("Valid, submitting:", combinedData);
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(combinedData),
       });
 
       const result = await response.json();
@@ -141,56 +203,91 @@ export default function LeadForm() {
   return (
     <>
       {!success && (
-        <>
+        <div>
           <Section
             title="Want to understand your visa options?"
             imageUrl="/info.png"
+            description="Submit the form below and our team of experience attorneys will review your information and send a preliminary assessment of your case based on your goals."
           >
-            Submit the form below and our team of experienced attorneys will
-            review your information and send a preliminary assessment of your
-            case based oon your goals.
-          </Section>
-          <div style={{ maxWidth: "25rem", margin: "2rem auto" }}>
             <JsonForms
-              schema={schema}
-              uischema={uischema}
-              data={data}
+              schema={personalSchema}
+              uischema={personalUiSchema}
+              data={personalData}
               renderers={materialRenderers}
               cells={materialCells}
               onChange={({ data, errors }) => {
-                setData(data);
-                setErrors(errors);
+                setPersonalData(data);
+                setPersonalErrors(errors);
               }}
               validationMode={
                 showValidation ? "ValidateAndShow" : "ValidateAndHide"
               }
             />
+          </Section>
+
+          <Section title="Visa cateogires of interest?" imageUrl="/dice.png">
+            <JsonForms
+              schema={interestSchema}
+              uischema={interestUiSchema}
+              data={interestData}
+              renderers={materialRenderers}
+              cells={materialCells}
+              onChange={({ data, errors }) => {
+                setInterestData(data);
+                setInterestErrors(errors);
+              }}
+              validationMode={
+                showValidation ? "ValidateAndShow" : "ValidateAndHide"
+              }
+            />
+          </Section>
+
+          <Section title="How can we help you?" imageUrl="/heart.png">
+            <JsonForms
+              schema={helpSchema}
+              uischema={helpUiSchema}
+              data={helpData}
+              renderers={materialRenderers}
+              cells={materialCells}
+              onChange={({ data, errors }) => {
+                setHelpData(data);
+                setHelpErrors(errors);
+              }}
+              validationMode={
+                showValidation ? "ValidateAndShow" : "ValidateAndHide"
+              }
+            />
+          </Section>
+
+          <div style={{ maxWidth: "25rem", margin: "0 auto" }}>
             {apiError && (
-              <Alert severity="error" sx={{ maxWidth: "25rem" }}>
+              <Alert severity="error" className="mb-4">
                 {apiError}
               </Alert>
             )}
+
             <Button
               fullWidth
               onClick={handleSubmit}
               variant="contained"
-              sx={{ mt: 2, p: 2 }}
-              loading={loading}
+              sx={{ p: 2 }}
+              disabled={loading}
             >
-              Submit
+              {loading ? "Submitting..." : "Submit"}
             </Button>
           </div>
-        </>
+        </div>
       )}
+
       {success && (
         <>
           <Section title="Thank You" imageUrl="/info.png">
             Your information was submitted to our team of immigration attorneys.
-            Expect an emai lfrom hello@tryalam.ai.
+            Expect an email from hello@tryalam.ai.
           </Section>
           <Button
             fullWidth
-            onClick={() => (window.location = "/")}
+            onClick={() => (window.location.href = "/")}
             variant="contained"
             sx={{
               mt: 2,

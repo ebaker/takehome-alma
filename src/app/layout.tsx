@@ -12,6 +12,22 @@ const theme = createTheme({
   shape: {
     borderRadius: 16,
   },
+  components: {
+    MuiFormLabel: {
+      styleOverrides: {
+        asterisk: {
+          display: "none",
+        },
+      },
+    },
+    MuiFormGroup: {
+      styleOverrides: {
+        root: {
+          flexDirection: "column",
+        },
+      },
+    },
+  },
 });
 
 export default function RootLayout({
