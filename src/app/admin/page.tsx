@@ -1,5 +1,6 @@
 import styles from "./page.module.css";
 import Logo from "../components/Logo";
+import LeadsTable from "./components/LeadsTable";
 
 function AdminPage() {
   return (
@@ -13,7 +14,7 @@ function AdminPage() {
       </nav>
       <main className={styles.content}>
         <h2>Leads</h2>
-        <p>Main content area</p>
+        <LeadsTable />
       </main>
     </div>
   );
