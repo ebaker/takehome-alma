@@ -17,22 +17,3 @@
   font-weight: bold;
   padding: 4rem 0;
 }
-
-.subheader {
-  text-align: center;
-  max-width: 32rem;
-  margin: 0 auto;
-}
-
-.subheader img {
-  margin: 2rem 1rem 1rem;
-}
-
-.subheader div {
-  margin: 1rem;
-}
-
-.form {
-  max-width: 25rem;
-  margin: 2rem auto;
-}
