@@ -1,0 +1,35 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.nav {
+  width: 16rem;
+  padding: 1rem;
+  border-right: 1px solid #efefef
+}
+
+.logo {
+  margin-bottom: 4rem;
+  max-width: 8rem;
+  padding: 1rem;
+}
+
+.navItem {
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.active {
+  font-weight: 700;
+}
+
+.content {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+  border-left: 1px solid #f8f8f8;
+}
