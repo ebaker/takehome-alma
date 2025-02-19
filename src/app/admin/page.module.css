@@ -3,6 +3,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background: radial-gradient(25rem circle at 2.5% -10%, #f9fcd6 0%, rgba(249, 252, 214, 0.3) 50%, transparent 70%);
 }
 
 .nav {
