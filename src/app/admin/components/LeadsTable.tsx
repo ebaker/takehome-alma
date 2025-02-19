@@ -63,6 +63,11 @@ const leadsData = [
 
 export default function SubmissionsTable() {
   const [data, setData] = useState(leadsData);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredData = data.filter((submission) =>
+    submission.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -75,44 +80,55 @@ export default function SubmissionsTable() {
       )
     );
   return (
-    <table className={styles.table}>
-      <thead>
-        <tr>
-          <th>Full Name</th>
-          <th>Submitted At</th>
-          <th>Status</th>
-          <th>Country</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((submission) => (
-          <tr key={submission.id}>
-            <td>{submission.fullName}</td>
-            <td>{formatDate(submission.submittedAt)}</td>
-            <td>
-              <span className={`${styles.status} ${styles[submission.status]}`}>
-                {submission.status === "REACHED_OUT"
-                  ? "Reached Out"
-                  : "Pending"}
-              </span>
-            </td>
-            <td>{submission.country}</td>
-            <td>
-              <button
-                onClick={() => handleMarkReachedOut(submission.id)}
-                style={{
-                  visibility: `${
-                    submission.status === "PENDING" ? "visible" : "hidden"
-                  }`,
-                }}
-              >
-                Mark Reached Out
-              </button>
-            </td>
+    <div>
+      <input
+        type="text"
+        placeholder="Search"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className={styles.searchInput}
+      />
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Submitted At</th>
+            <th>Status</th>
+            <th>Country</th>
+            <th></th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filteredData.map((submission) => (
+            <tr key={submission.id}>
+              <td>{submission.fullName}</td>
+              <td>{formatDate(submission.submittedAt)}</td>
+              <td>
+                <span
+                  className={`${styles.status} ${styles[submission.status]}`}
+                >
+                  {submission.status === "REACHED_OUT"
+                    ? "Reached Out"
+                    : "Pending"}
+                </span>
+              </td>
+              <td>{submission.country}</td>
+              <td>
+                <button
+                  onClick={() => handleMarkReachedOut(submission.id)}
+                  style={{
+                    visibility: `${
+                      submission.status === "PENDING" ? "visible" : "hidden"
+                    }`,
+                  }}
+                >
+                  Mark Reached Out
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
