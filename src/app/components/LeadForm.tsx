@@ -37,8 +37,33 @@ export default function LeadForm() {
         type: "string",
         format: "email",
       },
+      citizenship: {
+        type: "string",
+        enum: [
+          "United States",
+          "Canada",
+          "United Kingdom",
+          "Australia",
+          "Germany",
+          "France",
+          "Italy",
+          "Spain",
+          "China",
+          "Japan",
+          "South Korea",
+          "India",
+          "Brazil",
+          "Mexico",
+          "South Africa",
+          "Other",
+        ],
+      },
+      website: {
+        type: "string",
+        format: "url",
+      },
     },
-    required: ["firstname", "lastname", "email"],
+    required: ["firstname", "lastname", "email", "citizenship", "website"],
   };
 
   const uischema = {
@@ -58,6 +83,16 @@ export default function LeadForm() {
         type: "Control",
         scope: "#/properties/email",
         label: "Email",
+      },
+      {
+        type: "Control",
+        scope: "#/properties/citizenship",
+        label: "Country of Citizenship",
+      },
+      {
+        type: "Control",
+        scope: "#/properties/website",
+        label: "LinkedIn / Personal Website URL",
       },
     ],
   };
