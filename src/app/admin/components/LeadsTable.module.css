@@ -58,20 +58,20 @@
   cursor: pointer;
 }
 
-.pagination {
+.table td.pagination {
   padding: 0.5rem 3rem 0.5rem 0.5rem;
   border-bottom: none;
   text-align: right;
 }
 
-.table tfoot button {
+.table td.pagination button {
   background: none;
   border: none;
   cursor: pointer;
   color: #666;
 }
 
-.table tfoot button:disabled {
+.table td.pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -90,4 +90,17 @@
   color: #000;
   border: 1px solid #000;
   border-radius: 0;
+}
+
+.markButton {
+  background-color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.markButton:hover {
+  background-color: #ddd;
 }

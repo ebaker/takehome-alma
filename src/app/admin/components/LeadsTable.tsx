@@ -18,9 +18,6 @@ export default function SubmissionsTable() {
   const [sortDirection, setSortDirection] = useState<SortDirection>(-1);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-  
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection((sortDirection * -1) as SortDirection);
@@ -57,6 +54,9 @@ export default function SubmissionsTable() {
       return matchesSearch && matchesStatus;
     })
   );
+
+  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
@@ -160,13 +160,14 @@ export default function SubmissionsTable() {
                 <td>
                   <button
                     onClick={() => handleMarkReachedOut(submission.id)}
+                    className={styles.markButton}
                     style={{
                       visibility: `${
                         submission.status === "PENDING" ? "visible" : "hidden"
                       }`,
                     }}
                   >
-                    Mark Reached Out
+                    Mark Reached Out ✓
                   </button>
                 </td>
               </tr>
@@ -176,14 +177,14 @@ export default function SubmissionsTable() {
           <tr>
             <td colSpan={5} className={styles.pagination}>
               <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 ❮
               </button>
-              
+
               <span>
-                {pageNumbers.map(pageNum => (
+                {pageNumbers.map((pageNum) => (
                   <button
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
@@ -195,9 +196,11 @@ export default function SubmissionsTable() {
                   </button>
                 ))}
               </span>
-              
+
               <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 ❯
