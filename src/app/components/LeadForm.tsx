@@ -6,6 +6,7 @@ import {
   materialRenderers,
   materialCells,
 } from "@jsonforms/material-renderers";
+import FileUploadRenderer from "./FileUploadRenderer";
 import { useState, useEffect } from "react";
 import { Button, Alert, TextField } from "@mui/material";
 
@@ -23,7 +24,7 @@ export default function LeadForm() {
   const [interestErrors, setInterestErrors] = useState([]);
 
   const [helpData, setHelpData] = useState({});
-  const [helpErrors, setHelpErrors] = useState(['Description is required']);
+  const [helpErrors, setHelpErrors] = useState(["Description is required"]);
 
   useEffect(() => {
     setMounted(true);
@@ -57,8 +58,19 @@ export default function LeadForm() {
         ],
       },
       website: { type: "string", format: "url" },
+      resume: {
+        type: "object",
+        properties: {},
+      },
     },
-    required: ["firstname", "lastname", "email", "citizenship", "website"],
+    required: [
+      "firstname",
+      "lastname",
+      "email",
+      "citizenship",
+      "website",
+      "resume",
+    ],
   };
 
   const personalUiSchema = {
@@ -89,8 +101,26 @@ export default function LeadForm() {
         scope: "#/properties/website",
         label: "LinkedIn / Personal Website URL",
       },
+      {
+        type: "Control",
+        scope: "#/properties/resume",
+        label: "Resume",
+      },
     ],
   };
+
+  const customRenderers = [
+    ...materialRenderers,
+    {
+      tester: (uischema, schema) => {
+        if (uischema.scope === "#/properties/resume") {
+          return 10;
+        }
+        return -1;
+      },
+      renderer: FileUploadRenderer,
+    },
+  ];
 
   const interestSchema = {
     type: "object",
@@ -119,7 +149,6 @@ export default function LeadForm() {
     ],
   };
 
-
   const handleSubmit = async () => {
     setShowValidation(true);
     setApiError("");
@@ -146,13 +175,24 @@ export default function LeadForm() {
     setLoading(true);
 
     try {
-      console.log("Valid, submitting:", combinedData);
+      // Create a new FormData instance
+      const formData = new FormData();
+
+      // Add the resume file if it exists
+      if (personalData.resume?.file) {
+        formData.append("resume", personalData.resume.file);
+      }
+
+      // Add all other data as JSON, excluding the file object
+      const dataWithoutFile = {
+        ...combinedData,
+        resume: undefined, // Remove the file object from JSON data
+      };
+      formData.append("data", JSON.stringify(dataWithoutFile));
+
       const response = await fetch("/api/leads", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(combinedData),
+        body: formData,
       });
 
       const result = await response.json();
@@ -188,7 +228,7 @@ export default function LeadForm() {
               schema={personalSchema}
               uischema={personalUiSchema}
               data={personalData}
-              renderers={materialRenderers}
+              renderers={customRenderers}
               cells={materialCells}
               onChange={({ data, errors }) => {
                 setPersonalData(data);
@@ -197,10 +237,16 @@ export default function LeadForm() {
               validationMode={
                 showValidation ? "ValidateAndShow" : "ValidateAndHide"
               }
+              options={{
+                showValidation: showValidation,
+                validationMode: showValidation
+                  ? "ValidateAndShow"
+                  : "ValidateAndHide",
+              }}
             />
           </Section>
 
-          <Section title="Visa cateogires of interest?" imageUrl="/dice.png">
+          <Section title="Visa categories of interest?" imageUrl="/dice.png">
             <JsonForms
               schema={interestSchema}
               uischema={interestUiSchema}
@@ -225,14 +271,20 @@ export default function LeadForm() {
               label=""
               required
               placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?"
-              value={helpData.description || ''}
+              value={helpData.description || ""}
               onChange={(e) => {
                 const newValue = e.target.value.trim();
                 setHelpData({ description: newValue });
-                setHelpErrors(newValue.length === 0 ? ['Description is required'] : []);
+                setHelpErrors(
+                  newValue.length === 0 ? ["Description is required"] : []
+                );
               }}
               error={showValidation && helpErrors.length > 0}
-              helperText={showValidation && helpErrors.length > 0 ? 'This field is required' : ''}
+              helperText={
+                showValidation && helpErrors.length > 0
+                  ? "This field is required"
+                  : ""
+              }
             />
           </Section>
 
@@ -258,24 +310,27 @@ export default function LeadForm() {
 
       {success && (
         <>
-          <Section title="Thank You" imageUrl="/info.png">
-            Your information was submitted to our team of immigration attorneys.
-            Expect an email from hello@tryalam.ai.
-          </Section>
-          <Button
-            fullWidth
-            onClick={() => (window.location.href = "/")}
-            variant="contained"
-            sx={{
-              mt: 2,
-              p: 2,
-              maxWidth: "25rem",
-              margin: "2rem auto",
-              display: "block",
-            }}
+          <Section
+            title="Thank You"
+            imageUrl="/info.png"
+            description="Your information was submitted to our team of immigration attorneys.
+            Expect an email from hello@tryalam.ai."
           >
-            Go Back to Homepage
-          </Button>
+            <Button
+              fullWidth
+              onClick={() => (window.location.href = "/")}
+              variant="contained"
+              sx={{
+                mt: 2,
+                p: 2,
+                maxWidth: "25rem",
+                margin: "2rem auto",
+                display: "block",
+              }}
+            >
+              Go Back to Homepage
+            </Button>
+          </Section>
         </>
       )}
     </>
