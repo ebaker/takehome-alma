@@ -34,11 +34,12 @@ Open [http://localhost:3000/admin](http://localhost:3000/admin) with username `a
 - Added sorting by column
 - Used no material ui, opting for css and some inline styles
 
-## Areas for Improvement
+## Areas for Improvement Given More Time
 
-- Not all TypeScript types were implemented, this would be my #1 focus with more time
+- Not all TypeScript types were implemented, this would be my #1 focus
 - The styling patterns I used were inconsistent: Material-UI, CSS modules, and in-line. I'd prefer to only use 2 of these patterns consistently
 - Component logic could be broken out into smaller components but it was faster to iterate with larger components
+- Next's Image component would perform better than img tags
 
 ### Leadform
 
