@@ -273,10 +273,11 @@ export default function LeadForm() {
               placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?"
               value={helpData.description || ""}
               onChange={(e) => {
-                const newValue = e.target.value.trim();
+                const newValue = e.target.value;
+                const trimmedValue = newValue.trim();
                 setHelpData({ description: newValue });
                 setHelpErrors(
-                  newValue.length === 0 ? ["Description is required"] : []
+                  trimmedValue.length === 0 ? ["Description is required"] : []
                 );
               }}
               error={showValidation && helpErrors.length > 0}
