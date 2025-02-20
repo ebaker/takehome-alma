@@ -6,8 +6,9 @@ import {
   materialRenderers,
   materialCells,
 } from "@jsonforms/material-renderers";
+import FileUploadRenderer from "./FileUploadRenderer";
 import { useState, useEffect } from "react";
-import { Button, Alert } from "@mui/material";
+import { Button, Alert, TextField } from "@mui/material";
 
 export default function LeadForm() {
   const [mounted, setMounted] = useState(false);
@@ -23,7 +24,7 @@ export default function LeadForm() {
   const [interestErrors, setInterestErrors] = useState([]);
 
   const [helpData, setHelpData] = useState({});
-  const [helpErrors, setHelpErrors] = useState([]);
+  const [helpErrors, setHelpErrors] = useState(["Description is required"]);
 
   useEffect(() => {
     setMounted(true);
@@ -57,8 +58,19 @@ export default function LeadForm() {
         ],
       },
       website: { type: "string", format: "url" },
+      resume: {
+        type: "object",
+        properties: {},
+      },
     },
-    required: ["firstname", "lastname", "email", "citizenship", "website"],
+    required: [
+      "firstname",
+      "lastname",
+      "email",
+      "citizenship",
+      "website",
+      "resume",
+    ],
   };
 
   const personalUiSchema = {
@@ -89,8 +101,26 @@ export default function LeadForm() {
         scope: "#/properties/website",
         label: "LinkedIn / Personal Website URL",
       },
+      {
+        type: "Control",
+        scope: "#/properties/resume",
+        label: "Resume",
+      },
     ],
   };
+
+  const customRenderers = [
+    ...materialRenderers,
+    {
+      tester: (uischema, schema) => {
+        if (uischema.scope === "#/properties/resume") {
+          return 10;
+        }
+        return -1;
+      },
+      renderer: FileUploadRenderer,
+    },
+  ];
 
   const interestSchema = {
     type: "object",
@@ -115,32 +145,6 @@ export default function LeadForm() {
         scope: "#/properties/interest",
         label: false,
         classNames: ["hide-required"],
-      },
-    ],
-  };
-
-  const helpSchema = {
-    type: "object",
-    properties: {
-      description: {
-        type: "string",
-      },
-    },
-    required: ["description"],
-  };
-
-  const helpUiSchema = {
-    type: "VerticalLayout",
-    elements: [
-      {
-        type: "Control",
-        scope: "#/properties/description",
-        label:
-          "What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?",
-        options: {
-          multiline: true,
-          rows: 5,
-        },
       },
     ],
   };
@@ -171,13 +175,24 @@ export default function LeadForm() {
     setLoading(true);
 
     try {
-      console.log("Valid, submitting:", combinedData);
+      // Create a new FormData instance
+      const formData = new FormData();
+
+      // Add the resume file if it exists
+      if (personalData.resume?.file) {
+        formData.append("resume", personalData.resume.file);
+      }
+
+      // Add all other data as JSON, excluding the file object
+      const dataWithoutFile = {
+        ...combinedData,
+        resume: undefined, // Remove the file object from JSON data
+      };
+      formData.append("data", JSON.stringify(dataWithoutFile));
+
       const response = await fetch("/api/leads", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(combinedData),
+        body: formData,
       });
 
       const result = await response.json();
@@ -213,7 +228,7 @@ export default function LeadForm() {
               schema={personalSchema}
               uischema={personalUiSchema}
               data={personalData}
-              renderers={materialRenderers}
+              renderers={customRenderers}
               cells={materialCells}
               onChange={({ data, errors }) => {
                 setPersonalData(data);
@@ -222,10 +237,16 @@ export default function LeadForm() {
               validationMode={
                 showValidation ? "ValidateAndShow" : "ValidateAndHide"
               }
+              options={{
+                showValidation: showValidation,
+                validationMode: showValidation
+                  ? "ValidateAndShow"
+                  : "ValidateAndHide",
+              }}
             />
           </Section>
 
-          <Section title="Visa cateogires of interest?" imageUrl="/dice.png">
+          <Section title="Visa categories of interest?" imageUrl="/dice.png">
             <JsonForms
               schema={interestSchema}
               uischema={interestUiSchema}
@@ -243,23 +264,32 @@ export default function LeadForm() {
           </Section>
 
           <Section title="How can we help you?" imageUrl="/heart.png">
-            <JsonForms
-              schema={helpSchema}
-              uischema={helpUiSchema}
-              data={helpData}
-              renderers={materialRenderers}
-              cells={materialCells}
-              onChange={({ data, errors }) => {
-                setHelpData(data);
-                setHelpErrors(errors);
+            <TextField
+              fullWidth
+              multiline
+              rows={5}
+              label=""
+              required
+              placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permament residency or short-term employment visa or both? Are there any timeline considerations?"
+              value={helpData.description || ""}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                const trimmedValue = newValue.trim();
+                setHelpData({ description: newValue });
+                setHelpErrors(
+                  trimmedValue.length === 0 ? ["Description is required"] : []
+                );
               }}
-              validationMode={
-                showValidation ? "ValidateAndShow" : "ValidateAndHide"
+              error={showValidation && helpErrors.length > 0}
+              helperText={
+                showValidation && helpErrors.length > 0
+                  ? "This field is required"
+                  : ""
               }
             />
           </Section>
 
-          <div style={{ maxWidth: "25rem", margin: "0 auto" }}>
+          <div style={{ maxWidth: "25rem", margin: "3rem auto" }}>
             {apiError && (
               <Alert severity="error" className="mb-4">
                 {apiError}
@@ -270,7 +300,7 @@ export default function LeadForm() {
               fullWidth
               onClick={handleSubmit}
               variant="contained"
-              sx={{ p: 2 }}
+              sx={{ p: 2, mb: 4 }}
               disabled={loading}
             >
               {loading ? "Submitting..." : "Submit"}
@@ -281,24 +311,27 @@ export default function LeadForm() {
 
       {success && (
         <>
-          <Section title="Thank You" imageUrl="/info.png">
-            Your information was submitted to our team of immigration attorneys.
-            Expect an email from hello@tryalam.ai.
-          </Section>
-          <Button
-            fullWidth
-            onClick={() => (window.location.href = "/")}
-            variant="contained"
-            sx={{
-              mt: 2,
-              p: 2,
-              maxWidth: "25rem",
-              margin: "2rem auto",
-              display: "block",
-            }}
+          <Section
+            title="Thank You"
+            imageUrl="/info.png"
+            description="Your information was submitted to our team of immigration attorneys.
+            Expect an email from hello@tryalam.ai."
           >
-            Go Back to Homepage
-          </Button>
+            <Button
+              fullWidth
+              onClick={() => (window.location.href = "/")}
+              variant="contained"
+              sx={{
+                mt: 2,
+                p: 2,
+                maxWidth: "25rem",
+                margin: "2rem auto",
+                display: "block",
+              }}
+            >
+              Go Back to Homepage
+            </Button>
+          </Section>
         </>
       )}
     </>

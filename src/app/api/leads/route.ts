@@ -1,27 +1,33 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json()
+    const formData = await request.formData();
+    const resume = formData.get("resume") as File;
+    const jsonData = formData.get("data");
 
-    if (!data) {
+    if (!jsonData) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
-      )
+      );
     }
-    console.log('Received:', data)
+
+    const data = JSON.parse(jsonData as string);
+
+    // save data here, instead log it
+    console.log("Received form ", data);
+    console.log("Received resume:", resume.name, resume.type, resume.size);
 
     return NextResponse.json(
-      { message: 'Successfully' },
+      { message: "Successfully submitted" },
       { status: 201 }
-    )
-
+    );
   } catch (error) {
-    console.error('Error:', error)
+    console.error("Error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
-    )
+    );
   }
 }
