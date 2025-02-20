@@ -1,41 +1,10 @@
-"use client";
+import { Metadata } from "next";
+import ClientLayout from "./ClientLayout";
 
-import { ThemeProvider, createTheme } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#1d1d1d",
-    },
-  },
-  shape: {
-    borderRadius: 16,
-  },
-  components: {
-    MuiFormLabel: {
-      styleOverrides: {
-        asterisk: {
-          display: "none",
-        },
-      },
-    },
-    MuiFormGroup: {
-      styleOverrides: {
-        root: {
-          flexDirection: "column",
-        },
-      },
-    },
-    MuiCheckbox: {
-      styleOverrides: {
-        root: {
-          color: "#bcbcbc",
-        },
-      },
-    },
-  },
-});
+export const metadata: Metadata = {
+  title: "Alma",
+  description: "Get an assessment of your immigration case",
+};
 
 export default function RootLayout({
   children,
@@ -45,10 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
